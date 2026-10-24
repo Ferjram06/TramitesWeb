@@ -10,7 +10,10 @@ public class HomeController : Controller
     {
         return View();
     }
-
+    public IActionResult Historial()
+    {
+        return View();
+    }
     public IActionResult Privacy()
     {
         return View();

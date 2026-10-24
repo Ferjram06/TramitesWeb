@@ -1,8 +1,255 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿
+@{
+    ViewData["Title"] = "Nueva solicitud";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="mb-4">
+    <p class="text-uppercase small fw-semibold text-secondary mb-2">
+        Registro de trámites
+    </p>
+    <h1 class="h2">Nueva solicitud</h1>
+    <p class="text-secondary">
+        Completa tus datos y adjunta los documentos requeridos para iniciar
+        tu trámite.
+    </p>
 </div>
+
+<div class="alert alert-light border mb-4" role="note">
+    <strong>Antes de comenzar:</strong>
+    los campos marcados con <span class="text-danger">*</span> son obligatorios.
+    Necesitarás un documento PDF y uno TXT.
+</div>
+
+<form id="solicitudForm" enctype="multipart/form-data" novalidate>
+    <div id="formError" class="alert alert-danger d-none" role="alert"
+         tabindex="-1"></div>
+
+    <section class="form-section mb-4" aria-labelledby="personalHeading">
+        <div class="section-heading">
+            <h2 id="personalHeading" class="h5 mb-1">1. Datos personales</h2>
+            <p class="text-secondary small mb-0">
+                Información biodemográfica del solicitante.
+            </p>
+        </div>
+
+        <div class="row g-3 mt-1">
+            <div class="col-md-6">
+                <label for="nombre" class="form-label">
+                    Nombre completo <span class="text-danger">*</span>
+                </label>
+                <input id="nombre" name="nombre" class="form-control"
+                       autocomplete="name" required maxlength="120" />
+                <div class="invalid-feedback">Ingresa tu nombre completo.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label for="fechaNacimiento" class="form-label">
+                    Fecha de nacimiento <span class="text-danger">*</span>
+                </label>
+                <input type="date" id="fechaNacimiento" name="fechaNacimiento"
+                       class="form-control" autocomplete="bday" required />
+                <div class="invalid-feedback">Selecciona tu fecha de nacimiento.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label for="correo" class="form-label">
+                    Correo electrónico <span class="text-danger">*</span>
+                </label>
+                <input type="email"
+                    id="correo"
+                    name="correo"
+                    class="form-control"
+                    autocomplete="email"
+                    required
+                    maxlength="150"
+                    aria-describedby="correoHelp" />
+                <div id="correoHelp" class="form-text">
+                    Ejemplo: usuario@gmail.com
+                </div>
+                <div class="invalid-feedback">
+                    Introduce un correo con formato válido.
+                </div>
+            </div>
+
+            <div class="col-md-6">
+            <label for="telefono" class="form-label">
+                Teléfono <span class="text-danger">*</span>
+            </label>
+            <input type="tel"
+                id="telefono"
+                name="telefono"
+                class="form-control"
+                autocomplete="tel"
+                inputmode="tel"
+                placeholder="55 1234 5678"
+                aria-describedby="telefonoHelp"
+                required
+                maxlength="20" />
+            <div id="telefonoHelp" class="form-text">
+                Escribe 10 dígitos, incluyendo la LADA. Puedes añadir +52.
+            </div>
+            <div class="invalid-feedback">
+                Introduce un teléfono mexicano válido de 10 dígitos.
+            </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="form-section mb-4" aria-labelledby="economicHeading">
+        <div class="section-heading">
+            <h2 id="economicHeading" class="h5 mb-1">2. Datos económicos</h2>
+            <p class="text-secondary small mb-0">
+                Información general de tu situación económica.
+            </p>
+        </div>
+
+        <div class="row g-3 mt-1">
+            <div class="col-md-6">
+                <label for="ocupacion" class="form-label">
+                    Ocupación <span class="text-danger">*</span>
+                </label>
+                <select id="ocupacion" name="ocupacion"
+                        class="form-select" required>
+                    <option value="">Selecciona una opción</option>
+                    <option value="Estudiante">Estudiante</option>
+                    <option value="Empleado">Empleado/a</option>
+                    <option value="Independiente">Trabajo independiente</option>
+                    <option value="Desempleado">Sin empleo actualmente</option>
+                    <option value="Otra">Otra</option>
+                </select>
+                <div class="invalid-feedback">Selecciona tu ocupación.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label for="ingresos" class="form-label">
+                    Ingreso mensual aproximado (MXN)
+                    <span class="text-danger">*</span>
+                </label>
+                <input type="number" id="ingresos" name="ingresos"
+                       class="form-control" min="0" max="100000000"
+                       step="0.01" required inputmode="decimal" />
+                <div class="invalid-feedback">
+                    Ingresa un monto igual o mayor que cero.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="form-section mb-4" aria-labelledby="geographicHeading">
+        <div class="section-heading">
+            <h2 id="geographicHeading" class="h5 mb-1">3. Datos geográficos</h2>
+            <p class="text-secondary small mb-0">
+                Lugar de residencia del solicitante.
+            </p>
+        </div>
+
+        <div class="row g-3 mt-1">
+            <div class="col-md-6">
+                <label for="estado" class="form-label">
+                    Estado <span class="text-danger">*</span>
+                </label>
+                <select id="estado" name="estado" class="form-select" required>
+                    <option value="">Selecciona una opción</option>
+                    <option value="Ciudad de México">Ciudad de México</option>
+                    <option value="Estado de México">Estado de México</option>
+                    <option value="Jalisco">Jalisco</option>
+                    <option value="Nuevo León">Nuevo León</option>
+                    <option value="Puebla">Puebla</option>
+                    <option value="Otro">Otro</option>
+                </select>
+                <div class="invalid-feedback">Selecciona tu estado.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label for="municipio" class="form-label">
+                    Municipio o alcaldía <span class="text-danger">*</span>
+                </label>
+                <input id="municipio" name="municipio" class="form-control"
+                       required maxlength="100" autocomplete="address-level2" />
+                <div class="invalid-feedback">
+                    Ingresa tu municipio o alcaldía.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="form-section mb-4" aria-labelledby="documentsHeading">
+        <div class="section-heading">
+            <h2 id="documentsHeading" class="h5 mb-1">4. Documentación</h2>
+            <p class="text-secondary small mb-0">
+                Adjunta ambos archivos. Formatos permitidos: PDF y TXT.
+                Tamaño máximo provisional: 10 MB por archivo.
+            </p>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-md-6">
+                <label for="archivoPdf" class="form-label">
+                    Documento PDF <span class="text-danger">*</span>
+                </label>
+                <input type="file" id="archivoPdf" name="archivoPdf"
+                       class="form-control" accept=".pdf,application/pdf"
+                       aria-describedby="pdfHelp pdfStatus" required />
+                <div id="pdfHelp" class="form-text">
+                    Selecciona un archivo con extensión .pdf.
+                </div>
+                <div id="pdfStatus" class="file-status mt-2"
+                     role="status" aria-live="polite">
+                    <span>○ Pendiente de selección</span>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label for="archivoTxt" class="form-label">
+                    Documento TXT <span class="text-danger">*</span>
+                </label>
+                <input type="file" id="archivoTxt" name="archivoTxt"
+                       class="form-control" accept=".txt,text/plain"
+                       aria-describedby="txtHelp txtStatus" required />
+                <div id="txtHelp" class="form-text">
+                    Selecciona un archivo con extensión .txt.
+                </div>
+                <div id="txtStatus" class="file-status mt-2"
+                     role="status" aria-live="polite">
+                    <span>○ Pendiente de selección</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="d-flex flex-column flex-sm-row justify-content-end gap-2">
+        <button type="reset" class="btn btn-outline-secondary">
+            Limpiar formulario
+        </button>
+        <button type="submit" class="btn btn-primary px-4">
+            Registrar solicitud
+        </button>
+    </div>
+</form>
+
+<div class="modal fade" id="folioModal" tabindex="-1"
+     aria-labelledby="folioModalTitle" aria-describedby="folioModalDescription"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4 p-md-5">
+                <div class="success-icon mb-3" aria-hidden="true">✓</div>
+                <h2 class="h4" id="folioModalTitle">¡Registro de prueba exitoso!</h2>
+                <p id="folioModalDescription" class="text-secondary">
+                    Este folio es una demostración. La solicitud aún no se
+                    ha guardado en la base de datos.
+                </p>
+                <p class="mb-1">Folio de seguimiento</p>
+                <p class="folio-number" id="folioNumber">TR-00001</p>
+                <button type="button" class="btn btn-primary"
+                        data-bs-dismiss="modal">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/solicitud.js" asp-append-version="true"></script>
+}
