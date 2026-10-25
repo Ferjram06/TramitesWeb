@@ -137,40 +137,83 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    form.addEventListener("submit", event => {
-        event.preventDefault();
- 
-        validarCorreo();
-        validarTelefono();
+    
+form.addEventListener("submit", async event => {
+    event.preventDefault();
 
-        const filesValid = files.map(updateFileStatus).every(Boolean);
-        const fieldsValid = form.checkValidity();
+    validarCorreo();
+    validarTelefono();
 
-        form.querySelectorAll("input, select").forEach(field => {
-            field.classList.toggle(
-                "is-invalid",
-                !field.checkValidity()
-            );
+    const filesValid = files.map(updateFileStatus).every(Boolean);
+    const fieldsValid = form.checkValidity();
+
+    form.querySelectorAll("input, select").forEach(field => {
+        field.classList.toggle(
+            "is-invalid",
+            !field.checkValidity()
+        );
+    });
+
+    if (!fieldsValid || !filesValid) {
+        errorBox.textContent =
+            "Revisa los campos señalados y adjunta ambos documentos correctamente.";
+        errorBox.classList.remove("d-none");
+        errorBox.focus();
+
+        form.querySelector(":invalid")?.focus();
+        return;
+    }
+
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalText = submitButton.textContent;
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Registrando...";
+    errorBox.classList.add("d-none");
+
+    try {
+        const formData = new FormData(form);
+
+        const response = await fetch("/Home/Crear", {
+            method: "POST",
+            body: formData
         });
 
-        if (!fieldsValid || !filesValid) {
-            errorBox.textContent =
-                "Revisa los campos señalados y adjunta ambos documentos correctamente.";
-            errorBox.classList.remove("d-none");
-            errorBox.focus();
+        const result = await response.json();
 
-            const firstInvalid = form.querySelector(":invalid");
-            firstInvalid?.focus();
-            return;
+        if (!response.ok) {
+            const messages = result.errores
+                ? Object.values(result.errores).flat()
+                : [result.mensaje || "No se pudo registrar la solicitud."];
+
+            throw new Error(messages.join(" "));
         }
 
-        // Folio exclusivamente demostrativo; no garantiza unicidad.
-        const number = Math.floor(Math.random() * 99999) + 1;
-        document.getElementById("folioNumber").textContent =
-            `TR-${String(number).padStart(5, "0")}`;
+        // El folio proviene del servidor y de la base de datos.
+        document.getElementById("folioNumber").textContent = result.folio;
 
-        modal.show();
-    });
+        document.getElementById("folioModalTitle").textContent =
+            "¡Solicitud registrada correctamente!";
+
+        document.getElementById("folioModalDescription").textContent =
+            "Tu información y documentos se guardaron correctamente. Conserva tu folio para dar seguimiento.";
+
+        bootstrap.Modal.getOrCreateInstance(
+            document.getElementById("folioModal")
+        ).show();
+
+    } catch (error) {
+        errorBox.textContent =
+            error.message || "Ocurrió un error al registrar la solicitud.";
+
+        errorBox.classList.remove("d-none");
+        errorBox.focus();
+
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = originalText;
+    }
+});
 
     form.addEventListener("reset", () => {
         setTimeout(() => {

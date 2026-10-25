@@ -1,0 +1,74 @@
+#include <iostream>
+#include <cmath>
+#include <windows.h>
+
+using namespace std;
+
+// Función para mover el cursor a una posición específica en la consola
+void gotoxy(int x, int y) {
+    COORD coord;
+    coord.X = x;
+    coord.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+
+// Función para dibujar un círculo aproximado con asteriscos
+void dibujarCirculo(int cx, int cy, int radio) {
+    for (int y = -radio; y <= radio; y++) {
+        for (int x = -radio; x <= radio; x++) {
+            if (x * x + y * y <= radio * radio) {
+                gotoxy(cx + x, cy + y);
+                cout << "*";
+            }
+        }
+    }
+}
+
+// Función para dibujar un triángulo en una posición dada
+void dibujarTriangulo(int x, int y, char direccion) {
+    int altura = 5;
+    switch(direccion) {
+        case 'U': // Triángulo hacia arriba
+            for (int i = 0; i < altura; i++) {
+                gotoxy(x - i, y - i);
+                for (int j = 0; j < (2 * i + 1); j++) cout << "*";
+            }
+            break;
+        case 'D': // Triángulo hacia abajo
+            for (int i = 0; i < altura; i++) {
+                gotoxy(x - i, y + i);
+                for (int j = 0; j < (2 * i + 1); j++) cout << "*";
+            }
+            break;
+        case 'L': // Triángulo hacia la izquierda
+            for (int i = 0; i < altura; i++) {
+                gotoxy(x - i, y - i);
+                for (int j = 0; j < (2 * i + 1); j++) gotoxy(x - i, y - i + j), cout << "*";
+            }
+            break;
+        case 'R': // Triángulo hacia la derecha
+            for (int i = 0; i < altura; i++) {
+                gotoxy(x + i, y - i);
+                for (int j = 0; j < (2 * i + 1); j++) gotoxy(x + i, y - i + j), cout << "*";
+            }
+            break;
+    }
+}
+
+int main() {
+    int cx = 40, cy = 12; // Centro de la consola
+
+    // Dibujar círculo en el centro
+    dibujarCirculo(cx, cy, 5);
+
+    // Dibujar triángulos en las posiciones requeridas
+    dibujarTriangulo(cx, cy - 7, 'U'); // Triángulo arriba
+    dibujarTriangulo(cx, cy + 7, 'D'); // Triángulo abajo
+    dibujarTriangulo(cx - 10, cy, 'L'); // Triángulo izquierda
+    dibujarTriangulo(cx + 10, cy, 'R'); // Triángulo derecha
+
+    // Mantener la ventana abierta
+    gotoxy(0, 25);
+    system("pause");
+    return 0;
+}
