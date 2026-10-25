@@ -6,9 +6,15 @@ namespace TramitesWeb.ViewModels;
 
 public class CrearSolicitudViewModel
 {
+    
     [Required(ErrorMessage = "El nombre es obligatorio.")]
-    [StringLength(120)]
+    [StringLength(120, MinimumLength = 10,
+        ErrorMessage = "El nombre debe tener entre 10 y 120 caracteres.")]
+    [RegularExpression(
+        @"^[\p{L}\p{M}]+(?:[ '\u2019-][\p{L}\p{M}]+)*$",
+        ErrorMessage = "El nombre solo puede contener letras, espacios, guiones y apóstrofes.")]
     public string Nombre { get; set; } = string.Empty;
+
 
     [Required(ErrorMessage = "La fecha de nacimiento es obligatoria.")]
     [DataType(DataType.Date)]

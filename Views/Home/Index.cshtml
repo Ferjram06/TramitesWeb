@@ -34,22 +34,43 @@
         </div>
 
         <div class="row g-3 mt-1">
-            <div class="col-md-6">
-                <label for="nombre" class="form-label">
-                    Nombre completo <span class="text-danger">*</span>
-                </label>
-                <input id="nombre" name="nombre" class="form-control"
-                       autocomplete="name" required maxlength="120" />
-                <div class="invalid-feedback">Ingresa tu nombre completo.</div>
+            
+<div class="col-md-6">
+        <label for="nombre" class="form-label">
+            Nombre completo <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+                id="nombre"
+                name="nombre"
+                class="form-control"
+                autocomplete="name"
+                required
+                minlength="10"
+                maxlength="120"
+                aria-describedby="nombreHelp" />
+            <div id="nombreHelp" class="form-text">
+                Escribe tu nombre completo, entre 10 y 120 caracteres.
             </div>
+            <div class="invalid-feedback">
+                Introduce un nombre válido de al menos 10 caracteres, sin números.
+            </div>
+        </div>
+
 
             <div class="col-md-6">
                 <label for="fechaNacimiento" class="form-label">
                     Fecha de nacimiento <span class="text-danger">*</span>
                 </label>
-                <input type="date" id="fechaNacimiento" name="fechaNacimiento"
-                       class="form-control" autocomplete="bday" required />
-                <div class="invalid-feedback">Selecciona tu fecha de nacimiento.</div>
+                <input type="date"
+                    id="fechaNacimiento"
+                    name="fechaNacimiento"
+                    class="form-control"
+                    autocomplete="bday"
+                    min="1900-01-01"
+                    required />
+                <div class="invalid-feedback">
+                    Introduce una fecha de nacimiento válida.
+                </div>
             </div>
 
             <div class="col-md-6">

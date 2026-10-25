@@ -1,0 +1,268 @@
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using SixLabors.ImageSharp;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Diagnostics.Eventing.Reader;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Mail;
+using System.Runtime.Remoting.Contexts;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+
+namespace ProyectoFIS
+{
+    internal class Metodos
+    {
+        SqlCommand cmdSql;
+        SqlDataReader leer;
+        SqlDataAdapter CopiasDatos;
+        //CONSTRUCTOR
+        public Metodos() { }
+        //METODOS
+        SqlConnection miConexion = new SqlConnection("Data Source=.;Initial Catalog=ListaAsistencia;Integrated Security=True");
+        public string NombreProfesor(string IDProfe)
+        {
+            miConexion.Open();
+            string Nombre = "No encontrado";
+
+            SqlCommand Nom = new SqlCommand("SELECT NombreCompleto FROM PROFESORES WHERE IdProfesor = @idprof", miConexion);
+            Nom.Parameters.AddWithValue("@idprof", IDProfe);
+            SqlDataReader dr = Nom.ExecuteReader();
+
+            if (dr.Read())
+            {
+                Nombre = dr["NombreCompleto"].ToString();
+            }
+
+            miConexion.Close();
+
+            return Nombre;
+        }
+        public string NombreProfesorIDE(string IDE)
+        {
+            miConexion.Open();
+            string Nombre = "No encontrado";
+
+            SqlCommand Nom = new SqlCommand("SELECT NombreCompleto FROM PROFESORES WHERE Identificador = @ideprof", miConexion);
+            Nom.Parameters.AddWithValue("@ideprof", IDE);
+            SqlDataReader dr = Nom.ExecuteReader();
+
+            if (dr.Read())
+            {
+                Nombre = dr["NombreCompleto"].ToString();
+            }
+
+            miConexion.Close();
+
+            return Nombre;
+        }
+        public string Materia(string IDProfe)
+        {
+            miConexion.Open();
+            string Materia = "No encontrado";
+
+            SqlCommand Nom = new SqlCommand("SELECT Materia FROM SECUENCIA WHERE IdProfesores_fk = @idprof", miConexion);
+            Nom.Parameters.AddWithValue("@idprof", IDProfe);
+            SqlDataReader dr = Nom.ExecuteReader();
+
+            if (dr.Read())
+            {
+                Materia = dr["Materia"].ToString();
+            }
+
+            miConexion.Close();
+
+            return Materia;
+        }
+        public bool AutenticarUsuario(string IDE, string CON)
+        {
+            miConexion.Open();
+            bool Validar = false;
+            string ValidacionUsu = string.Empty;
+            SqlCommand Validacion = new SqlCommand("SELECT Identificador, Contraseña FROM USUARIOS WHERE Identificador = @identificador AND Contraseña = @contrasena", miConexion);
+
+            Validacion.Parameters.AddWithValue("@identificador", IDE);
+            Validacion.Parameters.AddWithValue("@Contrasena", CON);
+            SqlDataReader dr = Validacion.ExecuteReader();
+            if (dr.Read())
+            {
+                Validar = true;
+                goto Valida;
+            }
+            else
+            {
+                miConexion.Close();
+                MessageBox.Show("Usuario y/o Contraseña Incorrectos", "AVISO", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Validar = false;
+                goto Valida;
+            }
+        Valida:
+            miConexion.Close();
+            return Validar;
+        }
+        public string NombreAlumno(string BoletaA)
+        {
+            miConexion.Open();
+            string Nombre = "No encontrado";
+            SqlCommand Busqueda = new SqlCommand("SELECT Nombre FROM ALUMNOS WHERE NoBoleta = @nboleta", miConexion);
+            Busqueda.Parameters.AddWithValue("@nboleta", BoletaA);
+            SqlDataReader dr = Busqueda.ExecuteReader();
+            if (dr.Read())
+            {
+                Nombre = dr["Nombre"].ToString();
+            }
+            miConexion.Close();
+
+            return Nombre;
+        }
+        public void Asistencia(string IdAlumno, string IdHorario, string NombreA,string Estado)
+        {
+            miConexion.Open();
+            string Fecha = DateTime.Now.ToString("d");
+            string Hora = DateTime.Now.ToString("t");
+            SqlCommand NuevoRegistro = new SqlCommand("insert into LISTAS([IdHorario_fk],[IdAlumnos_fk],[NombreAlumno],[Fecha],[HoraDeLlegada],[EstadoDeAsistencia]) values ('" + IdHorario + "','" + IdAlumno + "','" + NombreA + "','" + Fecha + "','" + Hora + "','" + Estado + "')", miConexion);
+            NuevoRegistro.ExecuteNonQuery();
+            miConexion.Close();
+        }
+        public string NumeroSalon(string idsecuencia, string idmateria, string idprof)
+        {
+            string NumeroS = string.Empty;
+            miConexion.Open();
+            SqlCommand NB = new SqlCommand("SELECT NumSalon FROM SECUENCIA WHERE IdSecuencia = @idsec & Materia = @materia & IdProfesores_fk = @idprof", miConexion);
+            NB.Parameters.AddWithValue("@idsec", idsecuencia);
+            NB.Parameters.AddWithValue("@materia", idsecuencia);
+            NB.Parameters.AddWithValue("@idprof", idsecuencia);
+            NB.ExecuteNonQuery();
+            SqlDataReader NumeroSal = NB.ExecuteReader();
+            if (NumeroSal.Read())
+            {
+                NumeroS = NumeroSal["NumeroSalon"].ToString();
+            }
+            miConexion.Close();
+            return NumeroS;
+        }
+        public string IdDelProfesor(string NombreProf)
+        {
+            miConexion.Open();
+            string idProf = string.Empty;
+            SqlCommand ID = new SqlCommand("SELECT IdProfresor FROM USUARIOS WHERE NombreCompleto = @nombre", miConexion);
+            ID.Parameters.AddWithValue("@nombre", NombreProf);
+            ID.ExecuteNonQuery();
+            SqlDataReader DR2 = ID.ExecuteReader();
+            if (DR2.Read())
+            {
+                idProf = DR2["IdUsuario"].ToString();
+            }
+            miConexion.Close();
+            return idProf;
+        }
+        public void GenerarPDF()
+        {
+            try
+            {
+                // Conexión SQL
+                using (miConexion)
+                {
+                    miConexion.Open();
+
+                    // Consulta SQL para obtener datos de la tabla REGISTRO
+                    string query = "SELECT * FROM LISTA";
+                    string Fecha = DateTime.Now.ToString("d");
+                    using (SqlCommand cmd = new SqlCommand(query, miConexion))
+                    {
+                        using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                        {
+                            DataTable dataTable = new DataTable();
+                            adapter.Fill(dataTable);
+
+                            // Crear documento PDF
+                            Document doc = new Document();
+                            PdfWriter writer = PdfWriter.GetInstance(doc, new FileStream("LISTA.pdf", FileMode.Create));
+
+                            doc.Open();
+
+                            // Crear tabla en el documento PDF
+                            PdfPTable table = new PdfPTable(dataTable.Columns.Count);
+                            for (int i = 0; i < dataTable.Columns.Count; i++)
+                            {
+                                table.AddCell(new Phrase(dataTable.Columns[i].ColumnName));
+                            }
+
+                            for (int i = 0; i < dataTable.Rows.Count; i++)
+                            {
+                                for (int j = 0; j < dataTable.Columns.Count; j++)
+                                {
+                                    table.AddCell(new Phrase(dataTable.Rows[i][j].ToString()));
+                                }
+                            }
+
+                            doc.Add(table);
+
+                            doc.Close();
+                            writer.Close();
+                        }
+                    }
+                    miConexion.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+        public string ObtenerCorreo(string idProf)
+        {
+            string correo = string.Empty;
+            miConexion.Open();
+            SqlCommand OBC = new SqlCommand("SELECT Correo FROM PROFESORES WHERE IdProfesor = @IdProf", miConexion);
+            OBC.Parameters.AddWithValue("@IdProf", idProf);
+            OBC.ExecuteNonQuery();
+            SqlDataReader DTOBC = OBC.ExecuteReader();
+            if (DTOBC.Read())
+            {
+                correo = DTOBC["Correo"].ToString();
+            }
+            miConexion.Close();
+            return correo;
+        }
+        public void GenerarYEnviarPDFPorCorreo(string destinatario)
+        {
+            string Fecha = DateTime.Now.ToString("d");
+            string asunto = "INFORME DE ASISTENCIA DEL: " + Fecha;
+            string cuerpoMensaje = "Su solitud de informe de asistencia del " + Fecha + " se encuentra en este pdf";
+            try
+            {
+                GenerarPDF();
+                string remitente = "proyectoaulaiv92@gmail.com";
+                string contraseña = "asfk nxop tblp efwc";
+
+                // Configuración del cliente SMTP para Gmail
+                SmtpClient clienteSmtp = new SmtpClient("smtp.gmail.com");
+                clienteSmtp.Port = 587;
+                clienteSmtp.Credentials = new NetworkCredential(remitente, contraseña);
+                clienteSmtp.EnableSsl = true;
+
+                // Crear el mensaje de correo electrónico
+                MailMessage mensaje = new MailMessage(remitente, destinatario, asunto, cuerpoMensaje);
+
+                Attachment adjunto = new Attachment("LISTA ASISTENCIA.pdf");
+                mensaje.Attachments.Add(adjunto);
+                clienteSmtp.Send(mensaje);
+
+                MessageBox.Show("Correo electrónico enviado correctamente.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al enviar el correo electrónico: " + ex.Message);
+            }
+        }
+    }
+}

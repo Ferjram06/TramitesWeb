@@ -6,10 +6,38 @@ document.addEventListener("DOMContentLoaded", () => {
     const errorBox = document.getElementById("formError");
     const modalElement = document.getElementById("folioModal");
     const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+    const fechaNacimiento = document.getElementById("fechaNacimiento");
+
+    fechaNacimiento.min = "1900-01-01";
+    fechaNacimiento.max = new Date().toLocaleDateString("en-CA");
 
     
     const correo = document.getElementById("correo");
     const telefono = document.getElementById("telefono");
+
+    
+    const nombre = document.getElementById("nombre");
+
+    function validarNombre() {
+        const valor = nombre.value.trim();
+
+        const formatoValido =
+            /^[\p{L}\p{M}]+(?:[ '\u2019-][\p{L}\p{M}]+)*$/u.test(valor);
+
+        const valido =
+            valor.length >= 10 &&
+            valor.length <= 120 &&
+            formatoValido;
+
+        nombre.setCustomValidity(
+            valido
+                ? ""
+                : "Escribe un nombre de 10 a 120 caracteres, usando letras y separadores válidos."
+        );
+
+        return valido;
+    }
+
 
     function validarCorreo() {
         const valor = correo.value.trim();
@@ -118,6 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     files.forEach(item => {
         item.input.addEventListener("change", () => {
+            if (field === nombre) validarNombre();
             updateFileStatus(item);
             errorBox.classList.add("d-none");
         });
@@ -125,9 +154,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     form.querySelectorAll("input, select").forEach(field => {
         field.addEventListener("input", () => {
+            if (field === nombre) validarNombre();
             field.classList.remove("is-invalid");
             if (field === correo) validarCorreo();
             if (field === telefono) validarTelefono();
+            validarNombre();
             errorBox.classList.add("d-none");
         });
 

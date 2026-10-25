@@ -25,10 +25,15 @@ public class HomeController : Controller
         return View();
     }
 
-    public IActionResult Historial()
-    {
-        return View();
-    }
+    public async Task<IActionResult> Historial()
+{
+    var solicitudes = await _context.Solicitudes
+        .AsNoTracking()
+        .OrderByDescending(s => s.FechaRegistro)
+        .ToListAsync();
+
+    return View(solicitudes);
+}
     
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -50,11 +55,14 @@ public class HomeController : Controller
                 "El teléfono debe contener 10 dígitos mexicanos.");
         }
 
-        if (modelo.FechaNacimiento.Date > DateTime.Today)
+        var fechaMinima = new DateTime(1900, 1, 1);
+
+        if (modelo.FechaNacimiento.Date < fechaMinima ||
+            modelo.FechaNacimiento.Date > DateTime.Today)
         {
             ModelState.AddModelError(
                 nameof(modelo.FechaNacimiento),
-                "La fecha de nacimiento no puede ser futura.");
+                "La fecha debe ser valida.");
         }
 
         const long maxSize = 10 * 1024 * 1024;
